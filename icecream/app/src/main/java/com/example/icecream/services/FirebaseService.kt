@@ -1,6 +1,7 @@
 package com.example.icecream.services
 
 import android.net.Uri
+import com.example.icecream.data.Icecream
 import com.example.icecream.data.User
 import com.example.icecream.repositories.Resource
 import com.google.firebase.firestore.FirebaseFirestore
@@ -37,6 +38,37 @@ class FirebaseService (
             e.printStackTrace()
             ""
         }
+    }
+
+    suspend fun saveIcecreamData(
+       icecream: Icecream
+    ): Resource<String>{
+        return try{
+            firestore.collection("icecrems").add(icecream).await()
+            Resource.Success("Uspešno sačuvani podaci")
+        }catch(e: Exception){
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
+    suspend fun uploadIcecreamGalleryImages(
+        images: List<Uri>
+    ): List<String>{
+        val downloadUrls = mutableListOf<String>()
+        for (image in images) {
+            try {
+                val fileName = "${System.currentTimeMillis()}.jpg"
+                val storageRef = storage.reference.child("icecream_images/gallery_images/$fileName")
+                val uploadTask = storageRef.putFile(image).await()
+                val downloadUrl = uploadTask.storage.downloadUrl.await()
+                downloadUrls.add(downloadUrl.toString())
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        return downloadUrls
     }
 
 
