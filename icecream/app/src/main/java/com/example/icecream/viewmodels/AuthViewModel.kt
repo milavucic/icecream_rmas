@@ -33,8 +33,6 @@ class AuthViewModel(): ViewModel(){
 
 
 
-
-
     init {
         if(repository.currentUser != null){
             _loginFlow.value = Resource.Success(repository.currentUser!!)
@@ -58,6 +56,19 @@ class AuthViewModel(): ViewModel(){
         _registerFlow.value = null
         _currentUserFlow.value = null
     }
+
+    fun getUser() = viewModelScope.launch {
+        val result = repository.getUser()
+        _currentUserFlow.value = result
+    }
+
+    fun getAllUsers() = viewModelScope.launch {
+        val result = repository.getAllUsers()
+        _allUsers.value = result
+    }
+
+
+
 }
 
 class AuthViewModelFactory: ViewModelProvider.Factory{

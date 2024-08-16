@@ -68,4 +68,55 @@ class AuthRepositoryImpl : AuthRepository {
         firebaseAuth.signOut()
     }
 
+
+    override suspend fun getUser(): Resource<User> {
+        return try {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser != null) {
+                val uid = currentUser.uid
+
+                val firestore = FirebaseFirestore.getInstance()
+
+                val userDoc = firestore.collection("users").document(uid)
+                val userSnapshot = userDoc.get().await()
+
+                if (userSnapshot.exists()) {
+                    val user = userSnapshot.toObject(User::class.java)
+                    if (user != null) {
+                        Resource.Success(user)
+                    } else {
+                        Resource.Failure(Exception("Mapiranje nije uspelo"))
+                    }
+                } else {
+                    Resource.Failure(Exception("Dokument ne postoji"))
+                }
+            } else {
+                Resource.Failure(Exception("Nema korisnika"))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun getAllUsers(): Resource<List<User>> {
+        return try {
+            val firestore = FirebaseFirestore.getInstance()
+            val usersDoc = firestore.collection("users")
+            val usersSnapshot = usersDoc.get().await()
+
+            if (!usersSnapshot.isEmpty) {
+                val usersList = usersSnapshot.documents.mapNotNull { document ->
+                    document.toObject(User::class.java)
+                }
+                Resource.Success(usersList)
+            } else {
+                Resource.Failure(Exception("Ne postoje korisnici u bazi"))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
 }
