@@ -10,7 +10,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.type.LatLng
 import kotlinx.coroutines.tasks.await
 
-class IcecreamRepositoryImpl:IcecreamRepository {
+class IcecreamRepositoryImpl : IcecreamRepository {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestoreInstance = FirebaseFirestore.getInstance()
     private val storageInstance = FirebaseStorage.getInstance()

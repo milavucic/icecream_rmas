@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.icecream.data.Icecream
+import com.example.icecream.data.Mark
 import com.example.icecream.repositories.IcecreamRepositoryImpl
+import com.example.icecream.repositories.MarkRepositoryImpl
 import com.example.icecream.repositories.Resource
 import com.google.type.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,20 +17,20 @@ import kotlinx.coroutines.launch
 
 class IcecreamViewModel :ViewModel(){
 
-    val repository = IcecreamRepositoryImpl()
-    //val rateRepository = RateRepositoryImpl()
+    val icecreamRepository = IcecreamRepositoryImpl()
+    val markRepository = MarkRepositoryImpl()
 
     private val _icecreamFlow = MutableStateFlow<Resource<String>?>(null)
     val icecreamFlow: StateFlow<Resource<String>?> = _icecreamFlow
 
-    //private val _newRate = MutableStateFlow<Resource<String>?>(null)
-    //val newRate: StateFlow<Resource<String>?> = _newRate
+    private val _markFlow = MutableStateFlow<Resource<String>?>(null)
+    val markFlow: StateFlow<Resource<String>?> = _markFlow
 
     private val _icecreams = MutableStateFlow<Resource<List<Icecream>>>(Resource.Success(emptyList()))
     val icecreams: StateFlow<Resource<List<Icecream>>> get() = _icecreams
 
-    //private val _rates = MutableStateFlow<Resource<List<Rate>>>(Resource.Success(emptyList()))
-    //val rates: StateFlow<Resource<List<Rate>>> get() = _rates
+    private val _marks = MutableStateFlow<Resource<List<Mark>>>(Resource.Success(emptyList()))
+    val marks: StateFlow<Resource<List<Mark>>> get() = _marks
 
 
     private val _userIcecreams = MutableStateFlow<Resource<List<Icecream>>>(Resource.Success(emptyList()))
@@ -39,7 +41,7 @@ class IcecreamViewModel :ViewModel(){
     }
 
     fun getAllIcecreams() = viewModelScope.launch {
-        _icecreams.value = repository.getAllIcecreams()
+        _icecreams.value = icecreamRepository.getAllIcecreams()
     }
 
     fun saveIcecream(
@@ -49,7 +51,7 @@ class IcecreamViewModel :ViewModel(){
         location: MutableState<LatLng?>
     ) = viewModelScope.launch{
         _icecreamFlow.value = Resource.loading
-        repository.saveIcecream(
+        icecreamRepository.saveIcecream(
             name=name,
             description = description,
             galleryImages = galleryImages,
@@ -61,7 +63,30 @@ class IcecreamViewModel :ViewModel(){
     fun getUserIcecreams(
         uid: String
     ) = viewModelScope.launch {
-        _userIcecreams.value = repository.getUserIcecreams(uid)
+        _userIcecreams.value = icecreamRepository.getUserIcecreams(uid)
+    }
+
+    fun getIcecreamMarks(
+        icid: String
+    ) = viewModelScope.launch {
+        _marks.value = Resource.loading
+        val result = markRepository.getIcecreamMarks(icid)
+        _marks.value = result
+    }
+
+    fun addIcecreamMark(
+        icid: String,
+        icecream: Icecream,
+        mark: Int
+    ) = viewModelScope.launch {
+        _markFlow.value = markRepository.addIcecreamMark(icid, icecream, mark)
+    }
+
+    fun updateIcecreamMark(
+        icid: String,
+        mark: Int
+    ) = viewModelScope.launch{
+        _markFlow.value = markRepository.updateIcecreamMark(icid, mark)
     }
 
 }
