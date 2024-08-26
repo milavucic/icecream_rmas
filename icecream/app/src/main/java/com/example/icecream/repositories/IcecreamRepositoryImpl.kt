@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
-import com.google.type.LatLng
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.tasks.await
 
 class IcecreamRepositoryImpl : IcecreamRepository {
@@ -41,7 +41,7 @@ class IcecreamRepositoryImpl : IcecreamRepository {
                     location = location
                 )
                 firebaseService.saveIcecreamData(icecream)
-               // databaseService.addPoints(currentUser.uid, 5)
+                firebaseService.addUserPoints(currentUser.uid, 5)
             }
             Resource.Success("Uspešno sačuvani podaci")
         }catch (e: Exception){

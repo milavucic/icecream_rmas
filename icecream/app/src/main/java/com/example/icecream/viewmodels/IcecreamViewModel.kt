@@ -10,7 +10,9 @@ import com.example.icecream.data.Mark
 import com.example.icecream.repositories.IcecreamRepositoryImpl
 import com.example.icecream.repositories.MarkRepositoryImpl
 import com.example.icecream.repositories.Resource
-import com.google.type.LatLng
+import com.google.android.gms.maps.model.LatLng
+
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -50,7 +52,7 @@ class IcecreamViewModel :ViewModel(){
         galleryImages: List<Uri>,
         location: MutableState<LatLng?>
     ) = viewModelScope.launch{
-        _icecreamFlow.value = Resource.loading
+        _icecreamFlow.value = Resource.Loading
         icecreamRepository.saveIcecream(
             name=name,
             description = description,
@@ -69,7 +71,7 @@ class IcecreamViewModel :ViewModel(){
     fun getIcecreamMarks(
         icid: String
     ) = viewModelScope.launch {
-        _marks.value = Resource.loading
+        _marks.value = Resource.Loading
         val result = markRepository.getIcecreamMarks(icid)
         _marks.value = result
     }

@@ -16,14 +16,24 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.NavHost
+import com.example.icecream.data.Icecream
+import com.example.icecream.data.User
+import com.example.icecream.repositories.Resource
 import com.example.icecream.screens.HomeScreen
+import com.example.icecream.screens.RankingScreen
 import com.example.icecream.screens.RegisterScreen
+import com.example.icecream.screens.UserScreen
+import com.example.icecream.viewmodels.IcecreamViewModel
+import com.google.gson.Gson
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Nav(
     viewModel: AuthViewModel,
+    icecreamViewModel: IcecreamViewModel
 
 ){
     val navController = rememberNavController()
@@ -42,8 +52,67 @@ fun Nav(
             )
         }
 
-        composable(Screens.homeScreen) {
+        composable(Screens.homeScreen){
+            val icResource = icecreamViewModel.icecreams.collectAsState()
+            val icMarkers = remember {
+                mutableListOf<Icecream>()
+            }
+            icResource.value.let {
+                when(it){
+                    is Resource.Success -> {
+                        icMarkers.clear()
+                        icMarkers.addAll(it.result)
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                    is Resource.Failure -> {
+                        Log.e("Podaci", it.toString())
+                    }
+                    null -> {}
+                }
+            }
             HomeScreen(
+                viewModel = viewModel,
+                navController = navController,
+                icecreamViewModel = icecreamViewModel,
+                icecreamMarkers =icMarkers
+            )
+        }
+
+        composable(
+            //route = Screens.userScreen,
+            route = "${Screens.userScreen}/{user}",
+            arguments = listOf(navArgument("userData"){
+                type = NavType.StringType
+            })
+        ){backStackEntry ->
+            //val userDataJson = backStackEntry.arguments?.getString("user")
+            //val userData = Gson().fromJson(userDataJson, User::class.java)
+            //val mine = FirebaseAuth.getInstance().currentUser?.uid == userData.id
+            val userJson = backStackEntry.arguments?.getString("user") ?: ""
+            Log.d("UserScreen", "Encoded userJson: $userJson")
+            //val decodedUserJson = URLDecoder.decode(userJson, StandardCharsets.UTF_8.toString())
+            val decodedUserJson = URLDecoder.decode(userJson ?: "", StandardCharsets.UTF_8.toString())
+            Log.d("UserScreen", "Decoded userJson: $decodedUserJson")
+            val userData = Gson().fromJson(decodedUserJson, User::class.java)
+            Log.d("UserScreen", "Parsed User: $userData")
+            if (userData != null) {
+            val mine = FirebaseAuth.getInstance().currentUser?.uid == userData.id
+            UserScreen(
+                navController = navController,
+                viewModel = viewModel,
+                user= userData,
+                myProfile = mine
+            )
+            }
+            else{
+                Log.d("UserScreen", "Greska ")
+            }
+        }
+
+        composable(Screens.rankingScreen){
+            RankingScreen(
                 viewModel = viewModel,
                 navController = navController
             )

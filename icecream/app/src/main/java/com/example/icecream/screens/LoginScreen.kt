@@ -47,7 +47,7 @@ fun LoginScreen(
     val buttonIsEnabled = remember { mutableStateOf(true) }
     val isLoading = remember { mutableStateOf(false) }
 
-    // Wrap everything in a Box to set the background image
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -200,7 +200,7 @@ fun LoginScreen(
 
                 }
             }
-            is Resource.loading -> {
+            is Resource.Loading -> {
                 // Do nothing, as isLoading is already set in onClick
             }
             is Resource.Success -> {

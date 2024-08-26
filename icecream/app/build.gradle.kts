@@ -85,4 +85,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("com.google.code.gson:gson:2.8.9") // Or the latest version
+    implementation("androidx.compose.material:material:1.4.0") // Or the latest version
+    implementation("androidx.compose.ui:ui:1.4.0") // Or the latest version
+
+
 }

@@ -18,4 +18,6 @@
     <string name="phone_number_example_text">0601234567</string>
     <string name="already_have_account">Već imaš nalog?</string>
     <string name="lets_login">Prijavi se</string>
+    <string name="add_new_icecream_heading">Dodaj lokaciju novog štanda</string>
+    <string name="search_text">Pretrazi po opisu</string>
 </resources>

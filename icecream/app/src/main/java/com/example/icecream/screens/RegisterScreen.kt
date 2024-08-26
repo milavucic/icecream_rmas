@@ -104,7 +104,7 @@ fun RegisterScreen(
     ) {
         // Background image
         Image(
-            painter = painterResource(id = R.drawable.sladoled), // Replace with your image resource
+            painter = painterResource(id = R.drawable.sladoled),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -230,7 +230,7 @@ fun RegisterScreen(
                         }
                         email.value.isEmpty() -> {
                             isEmailError.value = true
-                            emailErrorText.value = "Email is required"
+                            emailErrorText.value = "Email je obavezan"
                             isLoading.value = false
                         }
                         fullName.value.isEmpty() -> {
@@ -243,7 +243,7 @@ fun RegisterScreen(
                         }
                         password.value.isEmpty() -> {
                             isPasswordError.value = true
-                            passwordErrorText.value = "Password is required"
+                            passwordErrorText.value = "Lozinka je obavezna"
                             isLoading.value = false
                         }
                         else -> {
@@ -293,7 +293,7 @@ fun RegisterScreen(
                 errorText.value = it.exception.message ?: "Registration failed"
                 isError.value = true
             }
-            is Resource.loading -> {
+            is Resource.Loading -> {
                 // Do nothing, as isLoading is already set in onClick
             }
             is Resource.Success -> {
@@ -358,8 +358,10 @@ fun RegisterImage(
                     }
             )
         } else {
+            selectedImageUri.value?.let { uri ->
             AsyncImage(
-                model = selectedImageUri.value,
+                model = uri,
+                //selectedImageUri.value,
                 contentDescription = null,
                 modifier = Modifier
                     .size(140.dp)
@@ -377,4 +379,5 @@ fun RegisterImage(
             )
         }
     }
+}
 }

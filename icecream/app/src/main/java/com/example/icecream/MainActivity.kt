@@ -1,8 +1,12 @@
 package com.example.icecream
 
+import android.app.Application
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.navigation.NavHostController
@@ -15,37 +19,27 @@ import com.example.icecream.screens.LoginScreen
 import com.example.icecream.screens.RegisterScreen
 import com.example.icecream.ui.theme.IcecreamTheme
 import com.example.icecream.viewmodels.AuthViewModel
+import com.example.icecream.viewmodels.AuthViewModelFactory
+import com.example.icecream.viewmodels.IcecreamViewModel
+import com.example.icecream.viewmodels.IcecreamViewModelFactory
 
 class MainActivity : ComponentActivity() {
-    private lateinit var navController: NavHostController
-    private lateinit var authViewModel: AuthViewModel
+    //private lateinit var navController: NavHostController
+    //private lateinit var authViewModel: AuthViewModel
+    //private lateinit var icecreamViewModel: IcecreamViewModel
+    private val userViewModel: AuthViewModel by viewModels {
+        AuthViewModelFactory()
+    }
+    private val icecreamViewModel: IcecreamViewModel by viewModels{
+        IcecreamViewModelFactory()
+    }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        authViewModel = AuthViewModel() // Initialize your ViewModel
         setContent {
-            IcecreamTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    navController = rememberNavController()
-                    NavHost(
-                        navController = navController,
-                        startDestination = Screens.loginScreen
-                    ) {
-                        composable(Screens.loginScreen) {
-                            LoginScreen(viewModel = authViewModel, navController = navController)
-                        }
+            Application(userViewModel, icecreamViewModel)
 
-                        composable(Screens.registerScreen) {
-                            RegisterScreen(viewModel = authViewModel, navController = navController)
-                        }
-
-                        composable(Screens.homeScreen) {
-                            HomeScreen(viewModel = authViewModel, navController = navController)
-                        }
-                        // Define other composable screens here...
-                    }
-                }
-            }
         }
     }
 }

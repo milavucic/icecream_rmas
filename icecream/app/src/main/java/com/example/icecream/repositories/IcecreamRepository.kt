@@ -2,7 +2,7 @@ package com.example.icecream.repositories
 
 import android.net.Uri
 import com.example.icecream.data.Icecream
-import com.google.type.LatLng
+import com.google.android.gms.maps.model.LatLng
 
 interface IcecreamRepository {
     suspend fun saveIcecream(

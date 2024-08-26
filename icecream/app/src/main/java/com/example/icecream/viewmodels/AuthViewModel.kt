@@ -40,12 +40,12 @@ class AuthViewModel(): ViewModel(){
     }
 
     fun login(email: String, password: String) = viewModelScope.launch{
-        _loginFlow.value = Resource.loading
+        _loginFlow.value = Resource.Loading
         val result = repository.login(email, password)
         _loginFlow.value = result
     }
     fun register(fullName: String, phoneNumber: String, profileImage: Uri, email: String, password: String) = viewModelScope.launch{
-        _registerFlow.value = Resource.loading
+        _registerFlow.value = Resource.Loading
         val result = repository.register(email, fullName, phoneNumber, profileImage, password)
         _registerFlow.value = result
     }

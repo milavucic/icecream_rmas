@@ -1,6 +1,7 @@
 package com.example.icecream.services
 
 import android.net.Uri
+import android.util.Log
 import com.example.icecream.data.Icecream
 import com.example.icecream.data.Mark
 import com.example.icecream.data.User
@@ -8,6 +9,7 @@ import com.example.icecream.repositories.Resource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import java.io.File
 
 class FirebaseService (
     private val storage: FirebaseStorage,
@@ -31,13 +33,40 @@ class FirebaseService (
         image: Uri
     ): String{
         return try{
-            val storageRef = storage.reference.child("profile_picture/$uid.jpg")
+            val storageRef = storage.reference.child("registration_uploads/$uid.jpg")
             val uploadTask = storageRef.putFile(image).await()
             val downloadUrl = uploadTask.storage.downloadUrl.await()
+            Log.d("UploadPicture", "Download URL: $downloadUrl")
             downloadUrl.toString()
         }catch (e: Exception){
-            e.printStackTrace()
+            //e.printStackTrace()
+            Log.e("UploadPictureError", "Failed to upload image", e)
             ""
+        }
+    }
+
+    suspend fun movePicture(oldPath: String, newPath: String) {
+        try {
+            val storageRef = storage.reference
+            val oldRef = storageRef.child(oldPath)
+            val newRef = storageRef.child(newPath)
+
+            // Download the file from the old path
+            val fileUri = oldRef.downloadUrl.await()
+            val file = File.createTempFile("tempFile", null)
+            oldRef.getFile(file).await()
+
+            // Upload the file to the new path
+            val uploadTask = newRef.putFile(Uri.fromFile(file)).await()
+            val downloadUrl = uploadTask.storage.downloadUrl.await()
+
+            // Optionally delete the old file after uploading
+            oldRef.delete().await()
+
+            Log.d("MovePicture", "File moved successfully to: $downloadUrl")
+
+        } catch (e: Exception) {
+            Log.e("MovePictureError", "Failed to move picture", e)
         }
     }
 
