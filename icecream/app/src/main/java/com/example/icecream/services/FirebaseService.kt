@@ -74,7 +74,7 @@ class FirebaseService (
        icecream: Icecream
     ): Resource<String>{
         return try{
-            firestore.collection("icecrems").add(icecream).await()
+            firestore.collection("icecreams").add(icecream).await()
             Resource.Success("Uspešno sačuvani podaci")
         }catch(e: Exception){
             e.printStackTrace()
