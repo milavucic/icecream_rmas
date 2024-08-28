@@ -229,7 +229,7 @@ fun UserScreen(
                             .padding(vertical = 20.dp, horizontal = 16.dp)
                     ) {
                         Text(
-                            text = "Lokacija",
+                            text = "Notifikacije",
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 color = Color.DarkGray,

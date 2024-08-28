@@ -109,25 +109,36 @@ class LocationService : Service() {
             throw Exception("GPS is disabled")
         }
 
-        val request = LocationRequest.create()
-            .setInterval(interval)
-            .setFastestInterval(interval)
+        val request = LocationRequest.create().apply {
+            setInterval(interval)
+            fastestInterval = interval
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY // Ensures GPS is prioritized
+        }
+
 
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 super.onLocationResult(result)
-                result.locations.lastOrNull()?.let { location ->
-                    launch { send(location) }
+                val location = result.locations.lastOrNull() ?: return
+
+                // Ignore locations with poor accuracy (>100 meters)
+                if (location.accuracy > 100) {
+                    Log.d("LocationService", "Ignoring inaccurate location: ${location.latitude}, ${location.longitude}")
+                    return
                 }
+
+                // Send the location to the flow
+                trySend(location).isSuccess
             }
         }
 
+        // Register the location callback correctly inside the callbackFlow
         location.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
 
+        // Ensure proper cleanup
         awaitClose { location.removeLocationUpdates(locationCallback) }
-    }
-
-    private fun broadcastLocationUpdate(latitude: Double, longitude: Double) {
+        }
+        private fun broadcastLocationUpdate(latitude: Double, longitude: Double) {
         val intent = Intent(ACTION_LOCATION_UPDATE).apply {
             putExtra(EXTRA_LOCATION_LATITUDE, latitude)
             putExtra(EXTRA_LOCATION_LONGITUDE, longitude)

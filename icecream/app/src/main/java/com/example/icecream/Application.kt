@@ -24,43 +24,51 @@ import com.example.icecream.viewmodels.IcecreamViewModel
 fun Application(
     viewModel: AuthViewModel,
     icecreamViewModel: IcecreamViewModel
-){
+) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     val isTrackingServiceEnabled = sharedPreferences.getBoolean("tracking_location", true)
 
+    // Check for location permissions
     if (ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        ) != PackageManager.PERMISSION_GRANTED &&
+        ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) != PackageManager.PERMISSION_GRANTED
     ) {
+        // Request permissions if they are not granted
         ActivityCompat.requestPermissions(
             context as Activity,
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ),
-            1
+            1 // Request code
         )
     } else {
-        if(isTrackingServiceEnabled) {
-            Intent(context, LocationService::class.java).apply {
-                action = LocationService.ACTION_FIND_NEARBY
-                context.startForegroundService(this)
-            }
-        }else{
-            Intent(context, LocationService::class.java).apply {
-                action = LocationService.ACTION_START
-                context.startForegroundService(this)
+        // Start LocationService when permissions are already granted
+        val intent = Intent(context, LocationService::class.java).apply {
+            // Set the action based on the tracking setting
+            action = if (isTrackingServiceEnabled) {
+                LocationService.ACTION_FIND_NEARBY
+            } else {
+                LocationService.ACTION_START
             }
         }
 
+        // Properly start the service as a foreground service
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+        Log.d("LocationService", "Service started with action: ${intent.action}")
     }
 
-
+    // Main UI surface
     Surface(modifier = Modifier.fillMaxSize()) {
         Nav(viewModel, icecreamViewModel)
     }

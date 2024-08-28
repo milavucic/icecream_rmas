@@ -187,6 +187,7 @@ fun HomeScreen(
                 Log.e("Podaci", it.toString())
             }
             null -> {}
+            else-> {}
         }
     }
 
@@ -222,7 +223,7 @@ fun HomeScreen(
         mutableStateOf(true)
     }
 
-    val receiver = remember {
+    /*val receiver = remember {
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == LocationService.ACTION_LOCATION_UPDATE) {
@@ -236,15 +237,39 @@ fun HomeScreen(
                 }
             }
         }
+    }*/
+    val receiver = remember {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == LocationService.ACTION_LOCATION_UPDATE) {
+                    val latitude = intent.getDoubleExtra(LocationService.EXTRA_LOCATION_LATITUDE, 0.0)
+                    val longitude = intent.getDoubleExtra(LocationService.EXTRA_LOCATION_LONGITUDE, 0.0)
+                    // Update the camera position
+                    myLocation.value = LatLng(latitude, longitude)
+                    Log.d("Nova lokacija", "Updated location: ${myLocation.value}")
+                }
+            }
+        }
     }
 
+    // Registering and unregistering the receiver
     DisposableEffect(context) {
+        LocalBroadcastManager.getInstance(context).registerReceiver(
+            receiver,
+            IntentFilter(LocationService.ACTION_LOCATION_UPDATE)
+        )
+        onDispose {
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
+        }
+    }
+
+    /*DisposableEffect(context) {
         LocalBroadcastManager.getInstance(context)
             .registerReceiver(receiver, IntentFilter(LocationService.ACTION_LOCATION_UPDATE))
         onDispose {
             LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
         }
-    }
+    }*/
 
     val mapUiSettings = remember { mutableStateOf(MapUiSettings()) }
 
@@ -255,10 +280,19 @@ fun HomeScreen(
     val markers = remember { mutableStateListOf<LatLng>() }
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
-
-
-
     LaunchedEffect(myLocation.value) {
+        myLocation.value?.let {
+            if (!isCameraSet.value) {
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 17f)
+                isCameraSet.value = true
+            }
+            markers.clear()
+            markers.add(it)
+        }
+    }
+
+
+   /* LaunchedEffect(myLocation.value) {
         myLocation.value?.let {
             Log.d("Nova lokacija gore", myLocation.toString())
             if (!isCameraSet.value) {
@@ -268,7 +302,7 @@ fun HomeScreen(
             markers.clear()
             markers.add(it)
         }
-    }
+    }*/
 
     val scope = rememberCoroutineScope()
 
@@ -290,16 +324,20 @@ fun HomeScreen(
                 properties = properties.value,
                 uiSettings = mapUiSettings.value
             ) {
-                markers.forEach { marker ->
-                    val icon = bitmapDescriptorFromVector(
-                        context, R.drawable.location
-                    )
-                    Marker(
-                        state = rememberMarkerState(position = marker),
-                        title = "Moja Lokacija",
-                        icon = icon,
-                        snippet = "",
-                    )
+
+
+                // Displaying the user's current location marker
+
+                    markers.forEach { marker ->
+                        val icon = bitmapDescriptorFromVector(
+                            context, R.drawable.location
+                        )
+                        Marker(
+                            state = rememberMarkerState(position = marker),
+                            title = "Moja Lokacija",
+                            icon = icon,
+                            snippet = "",
+                        )
                 }
                 Log.d("Is Filtered", isFiltered.value.toString())
                 if (!isFiltered.value) {
@@ -538,6 +576,7 @@ fun HomeScreen(
 
                 is Resource.Failure -> {}
                 Resource.Loading -> {}
+                else-> {}
             }
         }
     }
