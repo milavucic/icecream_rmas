@@ -21,12 +21,14 @@ class MarkRepositoryImpl:MarkRepository {
         mark: Int
     ): Resource<String> {
         return try{
+            val currentUserId = firebaseAuth.currentUser?.uid ?: return Resource.Failure(Exception("User not authenticated"))
             val marknew = Mark(
                 icecreamId=icecreamid,
                 userId = firebaseAuth.currentUser!!.uid,
                 mark = mark
             )
             firestoreService.addUserPoints(icecream.userId, mark*2)
+            firestoreService.addUserPoints(currentUserId, mark)
             val save = firestoreService.saveIcecreamMark(marknew)
             save
         }catch (e: Exception){

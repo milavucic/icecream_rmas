@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import com.example.icecream.data.Icecream
 import com.example.icecream.data.User
 import com.example.icecream.repositories.Resource
+import com.example.icecream.screens.AboutIcecreamScreen
 import com.example.icecream.screens.HomeScreen
 import com.example.icecream.screens.RankingScreen
 import com.example.icecream.screens.RegisterScreen
@@ -115,6 +116,34 @@ fun Nav(
             RankingScreen(
                 viewModel = viewModel,
                 navController = navController
+            )
+        }
+
+        composable(
+            route = "${Screens.aboutIcecreamScreen}/{icecream}/{icecreams}",
+            arguments = listOf(
+                navArgument("icecream"){ type = NavType.StringType },
+                navArgument("icecreams"){ type = NavType.StringType },
+            )
+        ){backStackEntry ->
+            val icJson = backStackEntry.arguments?.getString("icecream")?: ""
+            Log.d("IcecreamScreen", "Encoded icJson: $icJson")
+            val decodedicJson = URLDecoder.decode(icJson ?: "", StandardCharsets.UTF_8.toString())
+            Log.d("IcecreamScreen", "Decoded icJson: $decodedicJson")
+            val ic = Gson().fromJson(decodedicJson, Icecream::class.java)
+            val icsJson = backStackEntry.arguments?.getString("icecreams")
+            Log.d("IcecreamScreen", "Encoded icJson: $icJson")
+            val decodedicsJson = URLDecoder.decode(icsJson ?: "", StandardCharsets.UTF_8.toString())
+            Log.d("IcecreamScreen", "Decoded icsJson: $decodedicJson")
+            val ics = Gson().fromJson(decodedicsJson, Array<Icecream>::class.java).toList()
+            icecreamViewModel.getIcecreamMarks(ic.id)
+
+            AboutIcecreamScreen(
+                navController = navController,
+                icecreamViewModel = icecreamViewModel,
+                viewModel = viewModel,
+                icecream=ic,
+                icecreams = ics.toMutableList()
             )
         }
     }

@@ -324,11 +324,12 @@ fun HomeScreen(
                                 val icJson = Gson().toJson(marker)
                                 val encodedIcJson =
                                     URLEncoder.encode(icJson, StandardCharsets.UTF_8.toString())
+                                Log.d("IcecreamScreen", "first Json: $encodedIcJson")
 
                                 val icsJson = Gson().toJson(icecreamMarkers)
                                 val encodedicsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
-
-                                navController?.navigate(Screens.aboutIcecreamScreen + "/$encodedIcJson/$encodedicsJson")
+                                Log.d("IcecreamScreen", "second Json: $encodedicsJson")
+                                navController?.navigate("${Screens.aboutIcecreamScreen}/$encodedIcJson/$encodedicsJson")
                                 true
                             }
                         )
@@ -360,7 +361,7 @@ fun HomeScreen(
                                 val icsJson = Gson().toJson(filteredIc)
                                 val encodedicsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
 
-                                navController?.navigate(Screens.aboutIcecreamScreen + "/$encodedicJson/$encodedicsJson")
+                                navController?.navigate("${Screens.aboutIcecreamScreen}/$encodedicJson/$encodedicsJson")
                                 true
                             }
                         )

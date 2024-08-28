@@ -106,20 +106,7 @@ fun UserScreen(
     val fullImageUrl = "$storageBaseUrl$imagePath?alt=media"
 
     Log.d("GeneratedImageUrl", "URL: $fullImageUrl")
-    /*icResource?.value.let {
-        when(it){
-            is Resource.Success -> {
-                Log.d("Podaci", it.toString())
-                icecreams.clear()
-                icecreams.addAll(it.result)
-            }
-            is Resource.Loading -> {}
-            is Resource.Failure -> {
-                Log.e("Podaci", it.toString())
-            }
-            null -> {}
-        }
-    }*/
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -164,8 +151,8 @@ fun UserScreen(
                                 user.points <= 80 -> "Sladokusac"
                                 else -> "Sladomaster"
                             },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.Gray,
+                            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.W200),
+                            color = Color.Blue,
                             textAlign = TextAlign.Center
                         )
                     }

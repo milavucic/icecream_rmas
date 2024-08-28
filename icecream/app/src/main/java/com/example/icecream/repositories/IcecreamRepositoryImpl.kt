@@ -41,7 +41,7 @@ class IcecreamRepositoryImpl : IcecreamRepository {
                     location = location
                 )
                 firebaseService.saveIcecreamData(icecream)
-                firebaseService.addUserPoints(currentUser.uid, 5)
+                firebaseService.addUserPoints(icecream.userId, 5)
             }
             Resource.Success("Uspešno sačuvani podaci")
         }catch (e: Exception){
