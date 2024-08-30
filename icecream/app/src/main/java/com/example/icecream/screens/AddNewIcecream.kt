@@ -50,7 +50,7 @@ import android.Manifest
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AddNewIcecreamBottomSheet(
+fun AddNewIcecream(
     icecreamViewModel: IcecreamViewModel?,
     location: MutableState<LatLng?>,
     sheetState: ModalBottomSheetState

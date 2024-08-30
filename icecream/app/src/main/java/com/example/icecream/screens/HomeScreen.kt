@@ -195,9 +195,8 @@ fun HomeScreen(
 
     val userDataResource = viewModel?.currentUserFlow?.collectAsState()
 
-    val filteredIc = remember {
-        mutableListOf<Icecream>()
-    }
+
+    val filteredIc = remember { mutableStateListOf<Icecream>() }
 
     val searchValue = remember {
         mutableStateOf("")
@@ -223,21 +222,7 @@ fun HomeScreen(
         mutableStateOf(true)
     }
 
-    /*val receiver = remember {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == LocationService.ACTION_LOCATION_UPDATE) {
-                    val latitude =
-                        intent.getDoubleExtra(LocationService.EXTRA_LOCATION_LATITUDE, 0.0)
-                    val longitude =
-                        intent.getDoubleExtra(LocationService.EXTRA_LOCATION_LONGITUDE, 0.0)
-                    // Update the camera position
-                    myLocation.value = LatLng(latitude, longitude)
-                    Log.d("Nova lokacija", myLocation.toString())
-                }
-            }
-        }
-    }*/
+
     val receiver = remember {
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -263,13 +248,7 @@ fun HomeScreen(
         }
     }
 
-    /*DisposableEffect(context) {
-        LocalBroadcastManager.getInstance(context)
-            .registerReceiver(receiver, IntentFilter(LocationService.ACTION_LOCATION_UPDATE))
-        onDispose {
-            LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
-        }
-    }*/
+
 
     val mapUiSettings = remember { mutableStateOf(MapUiSettings()) }
 
@@ -292,17 +271,7 @@ fun HomeScreen(
     }
 
 
-   /* LaunchedEffect(myLocation.value) {
-        myLocation.value?.let {
-            Log.d("Nova lokacija gore", myLocation.toString())
-            if (!isCameraSet.value) {
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 17f)
-                isCameraSet.value = true
-            }
-            markers.clear()
-            markers.add(it)
-        }
-    }*/
+
 
     val scope = rememberCoroutineScope()
 
@@ -310,14 +279,15 @@ fun HomeScreen(
         sheetState = sheetState,
         sheetContent = {
             if (isAddNewBottomSheet.value)
-                AddNewIcecreamBottomSheet(icecreamViewModel!!, myLocation, sheetState)
+                AddNewIcecream(icecreamViewModel!!, myLocation, sheetState)
             else
-                FiltersBottomSheet(icecreamViewModel!!, viewModel!!, allIc, sheetState, isFiltered, isFilteredIndicator, filteredIc, icecreamMarkers, myLocation.value)
+                Filters(icecreamViewModel!!, viewModel!!, allIc, sheetState, isFiltered, isFilteredIndicator, filteredIc, icecreamMarkers, myLocation.value)
         },
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.fillMaxSize().background(Color.LightGray)) {
+            // Google Map with markers
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
@@ -406,14 +376,14 @@ fun HomeScreen(
                     }
                 }
             }
+            // Top Bar Layout with Search Box and Filter Icon
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
                     .padding(16.dp)
-                    .background(Color.LightGray)
             ) {
-                mapNavigationBar(
+                /*mapNavigationBar(
                     searchValue = searchValue,
                     profileImage = profileImage.value.ifEmpty { "" },
                     onImageClick = {
@@ -467,7 +437,46 @@ fun HomeScreen(
                             )
                         )
                     }
+                }*/
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White, RoundedCornerShape(10.dp))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    // Search Box
+                    TextField(
+                        value = searchValue.value,
+                        onValueChange = { searchValue.value = it },
+                        placeholder = { Text("Search...") },
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.White, RoundedCornerShape(10.dp)),
+                        singleLine = true,
+                        textStyle = TextStyle(color = Color.Black)
+                    )
+
+                    // Filter Icon
+                    IconButton(
+                        onClick = {
+                            isAddNewBottomSheet.value = false
+                            scope.launch {
+                                sheetState.show() // Show the filter bottom sheet when the icon is clicked
+                            }
+                        },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FilterAlt,
+                            contentDescription = "Filter",
+                            tint = if (isFiltered.value || isFilteredIndicator.value) Color.Blue else Color.Gray
+                        )
+                    }
                 }
+
+
             }
             Column(
                 modifier = Modifier
@@ -585,20 +594,7 @@ fun HomeScreen(
 
 
 
-@OptIn(ExperimentalMaterialApi::class)
-@SuppressLint("MutableCollectionMutableState")
-@Composable
-fun FiltersBottomSheet(
-    icecreamViewModel: IcecreamViewModel,
-    viewModel: AuthViewModel,
-    ic: MutableList<Icecream>,
-    sheetState: ModalBottomSheetState,
-    isFiltered: MutableState<Boolean>,
-    isFilteredIndicator: MutableState<Boolean>,
-    filteredic: MutableList<Icecream>,
-    markers: MutableList<Icecream>,
-    userLocation: LatLng?
-){}
+
 
 
 @Composable
