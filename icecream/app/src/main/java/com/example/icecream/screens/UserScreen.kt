@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,23 +30,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.outlined.FormatListNumbered
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.TableRows
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.icecream.R
 import com.example.icecream.data.Icecream
 import com.example.icecream.data.User
 import com.example.icecream.navigation.Screens
@@ -69,16 +58,12 @@ import com.google.gson.Gson
 import androidx.compose.ui.Modifier
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
+import com.example.icecream.viewmodels.SharedViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -86,8 +71,10 @@ import androidx.compose.ui.draw.clip
 fun UserScreen(
     navController: NavController?,
     viewModel: AuthViewModel?,
+    icecreamViewModel: IcecreamViewModel,
     user: User?,
-    myProfile: Boolean
+    myProfile: Boolean,
+    sharedViewModel: SharedViewModel
 ) {
     Log.d("UserScreen", "User: $user")
 
@@ -97,16 +84,14 @@ fun UserScreen(
     val trackingEnabled = sharedPreferences.getBoolean("tracking_location", true)
 
     val checked = remember { mutableStateOf(trackingEnabled) }
-    val icecreams = remember { mutableStateListOf<Icecream>() }
 
     val storageBaseUrl = "https://firebasestorage.googleapis.com/v0/b/icecream.appspot.com/o/"
-    //val imagePath = user?.image?.replace("/", "%2F") // Replace slashes with encoded versions
-    //val encodedImagePath = URLEncoder.encode(user?.image, "UTF-8")
     val imagePath = "registration_uploads/${user?.id}.jpg".replace("/", "%2F")
     val fullImageUrl = "$storageBaseUrl$imagePath?alt=media"
 
     Log.d("GeneratedImageUrl", "URL: $fullImageUrl")
 
+    val icecreamsState by icecreamViewModel.icecreams.collectAsState() // Collect state
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -252,7 +237,7 @@ fun UserScreen(
                                 )
                             )
                             Switch(
-                                checked = trackingEnabled,
+                                checked = checked.value,
                                 onCheckedChange = {
                                     checked.value = it
                                     if (it){
@@ -302,8 +287,6 @@ fun UserScreen(
                 }
             }
 
-
-
             // Logout Button
             if (myProfile) {
                 item {
@@ -316,10 +299,8 @@ fun UserScreen(
                             }
                         },
                         modifier = Modifier
-
                             .padding(16.dp)
                             .fillMaxWidth(),
-
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
                     ) {
                         Text(text = "Odjavi se", color = Color.White)
@@ -327,8 +308,6 @@ fun UserScreen(
                 }
             }
         }
-
-
 
         // Footer for Navigation
         Column(
@@ -344,19 +323,24 @@ fun UserScreen(
                 },
                 onRankingClick = {
                     navController?.navigate(Screens.rankingScreen)
-
                 },
                 onTableClick = {
-                    val icsJson = Gson().toJson(icecreams)
-                    val encodedicsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
-                    navController?.navigate("tableScreen/$encodedicsJson")
-
+                    when (icecreamsState) {
+                    is Resource.Success -> {
+                        val icecreamList = (icecreamsState as Resource.Success<List<Icecream>>).result
+                        sharedViewModel.setIcecreams(icecreamList) // Use the correct method to set data
+                        val icecreamsJson = Gson().toJson(icecreamList)
+                        val encodedIcecreamsJson = URLEncoder.encode(icecreamsJson, StandardCharsets.UTF_8.toString())
+                        Log.d("UserScreen", "encoded icecreamsJson: $encodedIcecreamsJson")
+                        navController?.navigate("${Screens.tableScreen}/$encodedIcecreamsJson")
+                    }
+                    else -> {
+                        Log.d("UserScreen", "Ice creams are not loaded or there is an error.")
+                    }
+                }
                 },
                 onProfileClick = {}
             )
         }
     }
 }
-
-
-

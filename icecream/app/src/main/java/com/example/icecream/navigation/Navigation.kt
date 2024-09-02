@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHost
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -23,8 +24,10 @@ import com.example.icecream.screens.AboutIcecreamScreen
 import com.example.icecream.screens.HomeScreen
 import com.example.icecream.screens.RankingScreen
 import com.example.icecream.screens.RegisterScreen
+import com.example.icecream.screens.TableScreen
 import com.example.icecream.screens.UserScreen
 import com.example.icecream.viewmodels.IcecreamViewModel
+import com.example.icecream.viewmodels.SharedViewModel
 import com.google.gson.Gson
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -33,22 +36,23 @@ import java.nio.charset.StandardCharsets
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Nav(
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
     icecreamViewModel: IcecreamViewModel
 
 ){
+    val shared: SharedViewModel = viewModel()
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screens.loginScreen) {
         composable(Screens.loginScreen){
             LoginScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 navController = navController
             )
         }
 
         composable(Screens.registerScreen) {
             RegisterScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 navController = navController
             )
         }
@@ -74,7 +78,7 @@ fun Nav(
                 }
             }
             HomeScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 navController = navController,
                 icecreamViewModel = icecreamViewModel,
                 icecreamMarkers =icMarkers
@@ -99,13 +103,16 @@ fun Nav(
             val userData = Gson().fromJson(decodedUserJson, User::class.java)
             Log.d("UserScreen", "Parsed User: $userData")
             if (userData != null) {
-            val mine = FirebaseAuth.getInstance().currentUser?.uid == userData.id
-            UserScreen(
-                navController = navController,
-                viewModel = viewModel,
-                user= userData,
-                myProfile = mine
-            )
+                val mine = FirebaseAuth.getInstance().currentUser?.uid == userData.id
+                UserScreen(
+                    navController = navController,
+                    viewModel = authViewModel,
+                    icecreamViewModel=icecreamViewModel,
+                    user= userData,
+                    myProfile = mine,
+                    sharedViewModel = shared
+
+                )
             }
             else{
                 Log.d("UserScreen", "Greska ")
@@ -114,7 +121,7 @@ fun Nav(
 
         composable(Screens.rankingScreen){
             RankingScreen(
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 navController = navController
             )
         }
@@ -141,9 +148,44 @@ fun Nav(
             AboutIcecreamScreen(
                 navController = navController,
                 icecreamViewModel = icecreamViewModel,
-                viewModel = viewModel,
+                viewModel = authViewModel,
                 icecream=ic,
                 icecreams = ics.toMutableList()
+            )
+        }
+
+
+        composable(
+            route = Screens.tableScreen + "/{icecreams}",
+            arguments = listOf(navArgument("icecreams") { type = NavType.StringType })
+        ){ backStackEntry ->
+            val icsJson = backStackEntry.arguments?.getString("icecreams")?: ""
+            Log.d("TableScreen", "Encoded icJson: $icsJson")
+            val decodedicsJson = URLDecoder.decode(icsJson ?: "", StandardCharsets.UTF_8.toString())
+            Log.d("TableScreen", "Decoded icsJson: $decodedicsJson")
+            val ics = Gson().fromJson(decodedicsJson, Array<Icecream>::class.java).toList()
+
+            TableScreen(icecreams = ics, navController = navController, icecreamViewModel = icecreamViewModel, authViewModel = authViewModel)
+        }
+
+
+        composable(
+            route = Screens.homeScreenParam + "/{icecreams}",
+            arguments = listOf(
+                navArgument("icecreams") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val icsJson = backStackEntry.arguments?.getString("icecreams")?: ""
+            Log.d("HomeScreen", "Encoded icJson: $icsJson")
+            val decodedicsJson = URLDecoder.decode(icsJson ?: "", StandardCharsets.UTF_8.toString())
+            Log.d("HomeScreen", "Decoded icsJson: $decodedicsJson")
+            val ics = Gson().fromJson(decodedicsJson, Array<Icecream>::class.java).toList()
+            HomeScreen(
+                viewModel = authViewModel,
+                navController = navController,
+                icecreamViewModel = icecreamViewModel,
+                icecreamMarkers =ics.toMutableList(),
+                isFilteredParam = true
             )
         }
     }

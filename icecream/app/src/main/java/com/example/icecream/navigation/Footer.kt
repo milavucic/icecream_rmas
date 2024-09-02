@@ -40,7 +40,7 @@ fun Footer(
     active: Int,
     onHomeClick: () -> Unit,
     onRankingClick: () -> Unit,
-    onTableClick: () -> Unit,
+    onTableClick: ()-> Unit,
     onProfileClick: () -> Unit,
 ) {
     Box(

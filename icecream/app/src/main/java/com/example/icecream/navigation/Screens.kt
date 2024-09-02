@@ -7,6 +7,6 @@ object Screens {
     val aboutIcecreamScreen="aboutIcecreamScreen/{icecream}/{icecreams}"
     val userScreen = "userScreen/{userData}"
     val rankingScreen = "rankingScreen"
-    val tableScreen="tableScreen"
+    val tableScreen="tableScreen/{icecreams}"
     val homeScreenParam="homeScreenParam"
 }
