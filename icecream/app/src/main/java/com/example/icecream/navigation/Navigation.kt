@@ -122,7 +122,9 @@ fun Nav(
         composable(Screens.rankingScreen){
             RankingScreen(
                 viewModel = authViewModel,
-                navController = navController
+                navController = navController,
+                icecreamViewModel=icecreamViewModel,
+                sharedViewModel = shared
             )
         }
 

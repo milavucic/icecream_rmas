@@ -104,17 +104,7 @@ fun Filters(
         }
     }
 
-    /*if (isFilteredIndicator.value && options != null) {
-        val type = object : TypeToken<List<Boolean>>() {}.type
-        val savedOptions: List<Boolean> = Gson().fromJson(options, type) ?: emptyList()
-        initialCheckedState.value = savedOptions
-    }
-    if(!filtersSet.value) {
-        if (isFilteredIndicator.value) {
-            rangeValues.floatValue = range
-        }
-        filtersSet.value = true
-    }*/
+
 
     val allUsersData = remember { mutableListOf<User>() }
     val selectedOptions = remember { mutableStateOf(initialCheckedState.value) }
