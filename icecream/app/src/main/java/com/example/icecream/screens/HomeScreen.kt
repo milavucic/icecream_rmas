@@ -1,14 +1,6 @@
 package com.example.icecream.screens
 
-import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.icons.Icons
@@ -46,26 +37,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.ui.unit.dp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
-import com.example.icecream.R
-import com.example.icecream.data.Icecream
-import com.example.icecream.data.User
-import com.example.icecream.navigation.Screens
-import com.example.icecream.repositories.Resource
-import com.example.icecream.services.LocationService
-import com.example.icecream.viewmodels.AuthViewModel
-import com.example.icecream.viewmodels.IcecreamViewModel
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -75,9 +53,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import com.google.gson.Gson
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -91,37 +66,90 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.example.icecream.navigation.Footer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-
 import android.Manifest
-
 import android.content.pm.PackageManager
-
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.material.icons.filled.FilterAlt
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
+
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.example.icecream.R
+import com.example.icecream.data.Icecream
+import com.example.icecream.data.User
+import com.example.icecream.navigation.Screens
+import com.example.icecream.repositories.Resource
+import com.example.icecream.services.LocationService
+import com.example.icecream.viewmodels.AuthViewModel
+import com.example.icecream.viewmodels.IcecreamViewModel
+import com.example.icecream.viewmodels.MapViewModel
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.GeoPoint
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import com.google.gson.Gson
+
 @RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     viewModel: AuthViewModel?,
@@ -145,9 +173,9 @@ fun HomeScreen(
     val isFilteredIndicator = remember { mutableStateOf(false) }
 
     // Initialize icecreamMarkersState to manage the marker state
-    val icecreamMarkersState = remember { mutableStateListOf<Icecream>() }
-    icecreamMarkersState.clear()
-    icecreamMarkersState.addAll(icecreamMarkers)
+    //val icecreamMarkersState = remember { mutableStateListOf<Icecream>() }
+    // icecreamMarkersState.clear()
+    //icecreamMarkersState.addAll(icecreamMarkers)
 
     // Check filter parameters
     if (isFilteredParam && (options != null || range != 1000f)) {
@@ -174,7 +202,7 @@ fun HomeScreen(
     // Retrieve user data
     viewModel?.getUser()
     val userDataResource = viewModel?.currentUserFlow?.collectAsState()
-
+    val markerscopy=icecreamMarkers
     // Define states for search, filtered data, and user information
     val searchValue = remember { mutableStateOf("") }
     val filteredIc = remember { mutableStateListOf<Icecream>() }
@@ -183,9 +211,12 @@ fun HomeScreen(
     val myLocation = remember { mutableStateOf<LatLng?>(null) }
     val showFilterDialog = remember { mutableStateOf(false) }
     val isAddNewBottomSheet = remember { mutableStateOf(true) }
-    val mapUiSettings = remember { mutableStateOf(MapUiSettings()) }
-    val properties = remember { mutableStateOf(MapProperties(mapType = MapType.TERRAIN)) }
+    //val mapUiSettings = remember { mutableStateOf(MapUiSettings()) }
+    //val properties = remember { mutableStateOf(MapProperties(mapType = MapType.TERRAIN)) }
     val markers = remember { mutableStateListOf<LatLng>() }
+    //val markers = remember { mutableStateListOf<MarkerOptions>() }
+    //val markers = remember { mutableStateListOf<MarkerState>() }
+    val markerProperties = remember { mutableMapOf<LatLng, MarkerProperties>() } // Store marker properties
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     // Update filtered results based on search value
@@ -195,8 +226,19 @@ fun HomeScreen(
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 17f)
                 isCameraSet.value = true
             }
+            /*markers.clear()
+            markerProperties.clear()
+            markers.add(MarkerOptions().position(it).title("Moja Lokacija").icon(bitmapDescriptorFromVector(context, R.drawable.location)))
+            markerProperties[it] = MarkerProperties(
+                title = "Moja Lokacija",
+                icon = bitmapDescriptorFromVector(context, R.drawable.location),
+                snippet = ""
+            )*/
+
+            // Clear existing markers and add new ones
             markers.clear()
             markers.add(it)
+
         }
         val searchTerm = searchValue.value.lowercase()
         filteredIc.clear()
@@ -207,7 +249,7 @@ fun HomeScreen(
             })
         }
         isFiltered.value = searchTerm.isNotBlank()
-        Log.d("Search", "Filtered Ic Size: ${filteredIc.size}")
+        Log.d("Search", "Search Value: $searchTerm, Is Filtered: ${isFiltered.value}, Filtered Ic Size: ${filteredIc.size}")
     }
 
     // Broadcast receiver for location updates
@@ -242,7 +284,7 @@ fun HomeScreen(
             if (isAddNewBottomSheet.value)
                 AddNewIcecream(icecreamViewModel!!, myLocation, sheetState)
             else
-                Filters(icecreamViewModel!!, viewModel!!, allIc, sheetState, isFiltered, isFilteredIndicator, filteredIc, icecreamMarkersState, myLocation.value)
+                Filters(icecreamViewModel!!, viewModel!!, allIc, sheetState, isFiltered, isFilteredIndicator, filteredIc, icecreamMarkers, myLocation.value)
         },
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         modifier = Modifier.fillMaxSize()
@@ -252,11 +294,22 @@ fun HomeScreen(
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
-                properties = properties.value,
-                uiSettings = mapUiSettings.value
+                //properties = properties.value,
+                //uiSettings = mapUiSettings.value
             ) {
+               /* markers.forEach { markerOptions ->
+                    val position = markerOptions.position
+                    Marker(
+                        state = rememberMarkerState(position = position),
+                        title = markerProperties[position]?.title,
+                        icon = markerProperties[position]?.icon,
+                        snippet = markerProperties[position]?.snippet
+                    )
+                }*/
                 markers.forEach { marker ->
-                    val icon = bitmapDescriptorFromVector(context, R.drawable.location)
+                    val icon = bitmapDescriptorFromVector(
+                        context, R.drawable.location
+                    )
                     Marker(
                         state = rememberMarkerState(position = marker),
                         title = "Moja Lokacija",
@@ -264,30 +317,86 @@ fun HomeScreen(
                         snippet = "",
                     )
                 }
-                // Decide which markers to show based on filtering
-                val markersToShow = if (isFiltered.value) filteredIc else icecreamMarkersState
-                markersToShow.forEach { marker ->
-                    val icon = bitmapDescriptorFromUrlWithRoundedCorners(context, 10f)
-                    Marker(
-                        state = rememberMarkerState(
-                            position = LatLng(marker.location.latitude, marker.location.longitude)
-                        ),
-                        title = "Ice Cream Location",
-                        icon = BitmapDescriptorFactory.defaultMarker(),
-                        snippet = marker.description,
-                        onClick = {
-                            val icJson = Gson().toJson(marker)
-                            val encodedIcJson = URLEncoder.encode(icJson, StandardCharsets.UTF_8.toString())
+                if(!isFiltered.value) {
+                    icecreamMarkers.forEach { marker ->
+                        Marker(
+                            state = rememberMarkerState(
+                                position = LatLng(
+                                    marker.location.latitude,
+                                    marker.location.longitude
+                                )
+                            ),
+                            title = "Moja Lokacija",
+                            icon = BitmapDescriptorFactory.defaultMarker(),
+                            snippet = marker.description,
+                            onClick = {
+                                val icJson = Gson().toJson(marker)
+                                val encodedIcJson = URLEncoder.encode(icJson, StandardCharsets.UTF_8.toString())
 
-                            val icsJson = Gson().toJson(markersToShow)
-                            val encodedIcsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
+                                val icsJson = Gson().toJson(icecreamMarkers)
+                                val encodedIcsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
 
-                            navController?.navigate("${Screens.aboutIcecreamScreen}/$encodedIcJson/$encodedIcsJson")
-                            true
-                        }
-                    )
+                                navController?.navigate("${Screens.aboutIcecreamScreen}/$encodedIcJson/$encodedIcsJson")
+                                true
+                            }
+                        )
+                    }
                 }
+                else{
+                    Log.d("Filtered", filteredIc.count().toString())
+                    filteredIc.forEach { marker ->
+
+                        Marker(
+                            state = rememberMarkerState(
+                                position = LatLng(
+                                    marker.location.latitude,
+                                    marker.location.longitude
+                                )
+                            ),
+                            title = "Moja Lokacija",
+                            icon = BitmapDescriptorFactory.defaultMarker(),
+                            snippet = marker.description,
+                            onClick = {
+                                val icJson = Gson().toJson(marker)
+                                val encodedIcJson = URLEncoder.encode(icJson, StandardCharsets.UTF_8.toString())
+
+                                val icsJson = Gson().toJson(filteredIc)
+                                val encodedIcsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
+
+                                navController?.navigate("${Screens.aboutIcecreamScreen}/$encodedIcJson/$encodedIcsJson")
+                                true
+                            }
+                        )
+                    }
+                }
+                LaunchedEffect(isFiltered.value) {
+                    Log.d("MarkersUpdate", "Markers list updated: ${filteredIc.size}")
+                    val markersListJson = Gson().toJson(filteredIc)
+                    Log.d("MarkersUpdate", "Markers to Show: $markersListJson")
+                }
+/*
+                val markersToShow = if (isFiltered.value) filteredIc else icecreamMarkers
+
+                markersToShow.forEach { icecream ->
+                    val position = LatLng(icecream.location.latitude, icecream.location.longitude)
+                    if (!markers.any { it.position == position }) {
+                        markers.add(MarkerOptions().position(position).title(icecream.name).icon(BitmapDescriptorFactory.defaultMarker()).snippet(icecream.description))
+                        markerProperties[position] = MarkerProperties(
+                            title = icecream.name,
+                            icon = BitmapDescriptorFactory.defaultMarker(),
+                            snippet = icecream.description
+                        )
+                    }
+                }
+*/
+
             }
+
+
+
+
+
+
 
             // Top Bar Layout with Search Box and Filter Icon
             Column(
@@ -324,7 +433,8 @@ fun HomeScreen(
                                                 icecream.description.lowercase().contains(searchTerm)
                                     })
                                 }
-                                Log.d("Search", "Filtered Ic Size: ${filteredIc.size}")
+                                isFiltered.value = searchTerm.isNotBlank()
+                                Log.d("Search", "Filtered Ic Size: ${filteredIc.size}, Is Filtered: ${isFiltered.value}")
                             }
                         },
                         placeholder = { Text("Pretraži po nazivu ili opisu") },
@@ -359,44 +469,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    IconButton(
-                        onClick = {
-                            properties.value = MapProperties(mapType = MapType.TERRAIN)
-                        },
-                        modifier = Modifier
-                            .size(45.dp)
-                            .clip(CircleShape)
-                            .background(Color.LightGray)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Terrain,
-                            contentDescription = "Terrain",
-                            tint = Color.White,
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    IconButton(
-                        onClick = {
-                            properties.value = MapProperties(mapType = MapType.SATELLITE)
-                        },
-                        modifier = Modifier
-                            .size(45.dp)
-                            .clip(CircleShape)
-                            .background(Color.LightGray)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Satellite,
-                            contentDescription = "Satellite",
-                            tint = Color.White,
-                        )
-                    }
-                }
+
                 Footer(
                     addNewIcecream = {
                         isAddNewBottomSheet.value = true
@@ -432,36 +505,37 @@ fun HomeScreen(
                 )
             }
         }
-        if (showFilterDialog.value) {
-            FilterDialog(
-                onApply = {
-                    showFilterDialog.value = false
-                },
-                onDismiss = {
-                    showFilterDialog.value = false
-                }
-            )
-        }
-
-
-        userDataResource?.value.let {
-            when (it) {
-                is Resource.Success -> {
-                    userData.value = it.result
-                    profileImage.value = it.result.image
-                }
-                null -> {
-                    userData.value = null
-                    profileImage.value = ""
-                }
-
-                is Resource.Failure -> {}
-                Resource.Loading -> {}
-                else -> {}
+    }
+    if (showFilterDialog.value) {
+        FilterDialog(
+            onApply = {
+                showFilterDialog.value = false
+            },
+            onDismiss = {
+                showFilterDialog.value = false
             }
+        )
+    }
+
+
+    userDataResource?.value.let {
+        when (it) {
+            is Resource.Success -> {
+                userData.value = it.result
+                profileImage.value = it.result.image
+            }
+            null -> {
+                userData.value = null
+                profileImage.value = ""
+            }
+
+            is Resource.Failure -> {}
+            Resource.Loading -> {}
+            else -> {}
         }
     }
 }
+
 
 
 
@@ -482,7 +556,7 @@ fun bitmapDescriptorFromUrlWithRoundedCorners(
 }
 
 
-fun bitmapDescriptorFromVector(
+/*fun bitmapDescriptorFromVector(
     context: Context,
     vectorId: Int
 ): BitmapDescriptor? {
@@ -499,6 +573,20 @@ fun bitmapDescriptorFromVector(
 
     val canvas = android.graphics.Canvas(bitmap)
     drawable.draw(canvas)
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
+}*/
+
+
+private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor {
+    val vectorDrawable = AppCompatResources.getDrawable(context, vectorResId) ?: return BitmapDescriptorFactory.defaultMarker()
+    val bitmap = Bitmap.createBitmap(
+        vectorDrawable.intrinsicWidth,
+        vectorDrawable.intrinsicHeight,
+        Bitmap.Config.ARGB_8888
+    )
+    val canvas = Canvas(bitmap)
+    vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
+    vectorDrawable.draw(canvas)
     return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
 
@@ -735,6 +823,16 @@ fun FilterDialog(
         // Dodajte elemente za filtriranje ovdje
     )
 }
+data class MarkerProperties(
+    val title: String,
+    val icon: BitmapDescriptor,
+    val snippet: String
+)
+
+
+
+
+
 
 
 

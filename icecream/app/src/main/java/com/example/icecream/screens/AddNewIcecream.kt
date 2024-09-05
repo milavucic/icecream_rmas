@@ -306,26 +306,17 @@ fun ShowImageSelectionDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Choose Image Source") },
-        text = { Text("Would you like to use the camera or select from the gallery?") },
+        text = { Text("Would you like to select from the gallery?") },
         confirmButton = {
-            TextButton(onClick = {
-                permissionLauncher.launch(
-                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE)
-                )
-                cameraService.launchCameraRequested = true
-            }) {
-                Text("Camera")
-            }
-        },
-        dismissButton = {
             TextButton(onClick = {
                 permissionLauncher.launch(
                     arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE)
                 )
                 cameraService.launchCameraRequested = false
             }) {
-                Text("Gallery")
+                Text("Yes")
             }
+
         }
     )
 }

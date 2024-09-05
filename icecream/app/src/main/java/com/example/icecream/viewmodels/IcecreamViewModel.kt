@@ -2,6 +2,8 @@ package com.example.icecream.viewmodels
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,12 +12,18 @@ import com.example.icecream.data.Mark
 import com.example.icecream.repositories.IcecreamRepositoryImpl
 import com.example.icecream.repositories.MarkRepositoryImpl
 import com.example.icecream.repositories.Resource
+import com.example.icecream.services.FirebaseService
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class IcecreamViewModel :ViewModel(){
 
@@ -40,13 +48,36 @@ class IcecreamViewModel :ViewModel(){
 
     init {
         getAllIcecreams()
+
     }
+
+    val firebaseService = FirebaseService(
+        FirebaseStorage.getInstance(),
+        FirebaseFirestore.getInstance()
+    )
+
+    private val _galleryImageUrls = MutableLiveData<List<String>>()
+    val galleryImageUrls: LiveData<List<String>> = _galleryImageUrls
+
+    suspend fun uploadImages(images: List<Uri>) :List<String>{
+        //return firebaseService.uploadIcecreamGalleryImages(images)
+        //CoroutineScope(Dispatchers.IO).launch {
+            val urls = firebaseService.uploadIcecreamGalleryImages(images)
+            _galleryImageUrls.postValue(urls)
+           // withContext(Dispatchers.Main) {
+               // onComplete(urls)
+            //}
+
+        //}
+        return urls
+    }
+
 
     fun getAllIcecreams() = viewModelScope.launch {
         _icecreams.value = icecreamRepository.getAllIcecreams()
     }
 
-    fun saveIcecream(
+    /*fun saveIcecream(
         name: String,
         description: String,
         galleryImages: List<Uri>,
@@ -57,6 +88,35 @@ class IcecreamViewModel :ViewModel(){
             name=name,
             description = description,
             galleryImages = galleryImages,
+            location = location.value!!
+        )
+        _icecreamFlow.value = Resource.Success("Uspešno dodato")
+    }*/
+
+    fun List<String>.toUriList(): List<Uri> {
+        return this.map { Uri.parse(it) }
+    }
+
+
+    fun saveIcecream(
+        name: String,
+        description: String,
+        galleryImages: List<Uri>,
+        location: MutableState<LatLng?>
+    ) = viewModelScope.launch {
+        _icecreamFlow.value = Resource.Loading
+
+        // Upload images and get their URLs
+        val imageUrls = uploadImages(galleryImages) // Returns List<String>
+
+        // Convert URLs back to URIs if needed by repository
+        val imageUris = imageUrls.toUriList()
+
+        // Save the ice cream with the image URLs
+        icecreamRepository.saveIcecream(
+            name = name,
+            description = description,
+            galleryImages = imageUris, // Pass the List<Uri> if repository needs it
             location = location.value!!
         )
         _icecreamFlow.value = Resource.Success("Uspešno dodato")
@@ -92,6 +152,7 @@ class IcecreamViewModel :ViewModel(){
     }
 
 }
+
 
 
 class IcecreamViewModelFactory: ViewModelProvider.Factory{

@@ -51,10 +51,11 @@ class AuthRepositoryImpl : AuthRepository {
                 val temporaryImageUrl = databaseService.uploadPicture(result.user!!.uid, profileImage)
 
                 // Define the final image path
-                val finalImagePath = "profile_picture/${result.user!!.uid}.jpg"
+                val finalImagePath = "registration_uploads/${result.user!!.uid}.jpg"
 
                 // Move the picture to the final location
-                databaseService.movePicture("profile_picture/${result.user!!.uid}_temp.jpg", finalImagePath)
+                //databaseService.movePicture("profile_picture/${result.user!!.uid}_temp.jpg", finalImagePath)
+                //databaseService.movePicture("registration_uploads/${result.user!!.uid}.jpg", finalImagePath)
 
                 // Create user data with the final image URL
                 val user = User(

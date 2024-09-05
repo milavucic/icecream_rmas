@@ -63,6 +63,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import com.example.icecream.R
 import com.example.icecream.viewmodels.SharedViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -85,11 +87,12 @@ fun UserScreen(
 
     val checked = remember { mutableStateOf(trackingEnabled) }
 
-    val storageBaseUrl = "https://firebasestorage.googleapis.com/v0/b/icecream.appspot.com/o/"
+    val storageBaseUrl = "https://firebasestorage.googleapis.com/v0/b/icecream-66b73.appspot.com/o/"
     val imagePath = "registration_uploads/${user?.id}.jpg".replace("/", "%2F")
     val fullImageUrl = "$storageBaseUrl$imagePath?alt=media"
 
     Log.d("GeneratedImageUrl", "URL: $fullImageUrl")
+
 
     val icecreamsState by icecreamViewModel.icecreams.collectAsState() // Collect state
 
@@ -116,13 +119,16 @@ fun UserScreen(
                     ) {
                         AsyncImage(
                             model = fullImageUrl,
-                            contentDescription = null,
+                            contentDescription = "Profile Picture",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(140.dp)
                                 .clip(CircleShape)
                                 .border(5.dp, Color.White, CircleShape)
-                                .background(Color.White, RoundedCornerShape(70.dp))
+                                .background(Color.White, RoundedCornerShape(70.dp)),
+                            onError = {
+                                Log.e("UserScreen", "Error loading image")
+                            }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(

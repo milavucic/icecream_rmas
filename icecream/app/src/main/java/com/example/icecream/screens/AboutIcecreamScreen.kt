@@ -39,6 +39,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -84,7 +86,8 @@ fun AboutIcecreamScreen(
     val myMark = remember { mutableStateOf(0) }
     val showRateDialog = remember { mutableStateOf(false) }
     val isLoading = remember { mutableStateOf(false) }
-
+    val galleryImageUrls by icecreamViewModel.galleryImageUrls.observeAsState(emptyList())
+    Log.d("GalleryImageUrls", "Image URLs: $galleryImageUrls")
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -93,35 +96,7 @@ fun AboutIcecreamScreen(
                 .align(Alignment.TopCenter)
                 .padding(16.dp)
         ) {
-            // Back Button
-            item {
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        Color.Blue,
-                        contentColor = Color.White
-                    ),
 
-                    onClick = {
-                        if (icecreams == null) {
-                            navController.popBackStack()
-                        } else {
-                            val isCameraSet = true
-                            val latitude = icecream.location.latitude
-                            val longitude = icecream.location.longitude
-
-                            val icsJson = Gson().toJson(icecreams)
-                            val encodedicsJson = URLEncoder.encode(icsJson, StandardCharsets.UTF_8.toString())
-                            navController.navigate(
-                                Screens.homeScreenParam +
-                                        "/$isCameraSet/$latitude/$longitude/$encodedicsJson"
-                            )
-                        }
-                    }
-
-                ) {
-                    Text(text = "Nazad")
-                }
-            }
 
             item { Spacer(modifier = Modifier.height(20.dp)) }
 
@@ -183,8 +158,8 @@ fun AboutIcecreamScreen(
 
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                // Here, replace with images using a standard composable if needed
-                icecream.galleryImages.forEach { imageUrl ->
+
+                galleryImageUrls.forEach { imageUrl ->
                     Image(
                         painter = rememberAsyncImagePainter(imageUrl),
                         contentDescription = "Gallery Image",
